@@ -29,7 +29,7 @@ ENV/
 env/
 
 # Poetry
-poetry.lock
+# poetry.lock (needed for deployment)
 
 # Docker
 .dockerignore
