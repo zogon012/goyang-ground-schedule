@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 import requests
 from bs4 import BeautifulSoup
-from datetime import date, time
+from datetime import date, time, datetime
 from pydantic import BaseModel
 from typing import List
 import re
 import json
+import pytz
 
 # 상수 정의
 TOTAL_FIELDS = 8  # 1~7번 필드 (range에서는 8까지)
+KST = pytz.timezone('Asia/Seoul')
 
 
 class TimeEncoder(json.JSONEncoder):
@@ -163,15 +165,21 @@ def get_empty_slots(schedule: DaySchedule) -> dict:
 
 
 def get_today_empty_slots() -> dict:
-    """오늘의 빈 시간을 반환하는 순수 함수"""
-    today = date.today()
+    """오늘의 빈 시간을 반환하는 순수 함수 (KST 기준)"""
+    # KST 기준 현재 날짜 계산
+    kst_now = datetime.now(KST)
+    today = kst_now.date()
+    
     schedule = get_schedule(today)
     return get_empty_slots(schedule)
 
 
 def get_today_complete_info() -> dict:
-    """오늘의 빈 시간과 예약 정보를 모두 반환하는 함수"""
-    today = date.today()
+    """오늘의 빈 시간과 예약 정보를 모두 반환하는 함수 (KST 기준)"""
+    # KST 기준 현재 날짜 계산
+    kst_now = datetime.now(KST)
+    today = kst_now.date()
+    
     schedule = get_schedule(today)
     empty_slots = get_empty_slots(schedule)
 
@@ -198,8 +206,10 @@ def get_today_complete_info() -> dict:
 
 
 def get_today_complete_info_json() -> str:
-    """오늘의 완전한 정보를 JSON으로 반환하는 함수"""
-    today = date.today()
+    """오늘의 완전한 정보를 JSON으로 반환하는 함수 (KST 기준)"""
+    # KST 기준 현재 날짜 계산
+    kst_now = datetime.now(KST)
+    today = kst_now.date()
     weekday = ["월", "화", "수", "목", "금", "토", "일"][today.weekday()]
 
     complete_info = get_today_complete_info()
