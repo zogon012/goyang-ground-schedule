@@ -41,8 +41,7 @@ cd ground
 docker-compose up -d
 
 # 웹 브라우저에서 접속
-# 로컬: http://localhost:8000
-# 네트워크: http://192.168.0.70:8000 (실제 서버 IP)
+open http://localhost:8000
 ```
 
 ### 개발 환경 설정
@@ -86,32 +85,8 @@ poetry run pytest tests/test_simple.py -v
 # 통합 테스트 (서버 필요)
 poetry run pytest tests/test_integration.py -v
 
-# 버전 확인 (로컬)
+# 버전 확인
 curl http://localhost:8000/health | jq '.version'
-
-# 버전 확인 (네트워크)
-curl http://192.168.0.70:8000/health | jq '.version'
-```
-
-## 네트워크 접근
-
-서버는 다음 주소로 접근 가능합니다:
-
-- **로컬 접근**: `http://localhost:8000`
-- **네트워크 접근**: `http://192.168.0.70:8000`
-
-Docker 컨테이너는 `0.0.0.0:8000`에서 실행되므로 같은 네트워크의 다른 기기에서도 접근할 수 있습니다.
-
-### 방화벽 설정
-
-macOS에서 다른 기기의 접근을 허용하려면:
-
-```bash
-# 방화벽 상태 확인
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
-
-# 포트 8000 허용 (필요시)
-sudo pfctl -f /etc/pf.conf
 ```
 
 ## 환경 변수

@@ -910,7 +910,7 @@
             timeSlots.innerHTML = '';
 
             // 현재 시간이 운영 시간 외인지 확인
-            const isOutOfHours = timeData.current_hour < 7 || timeData.current_hour >= 22;
+            const isOutOfHours = timeData.current_hour < 7 || timeData.current_hour >= 23;
             
             // 운영 시간 외 메시지 표시
             if (isOutOfHours) {
@@ -920,15 +920,15 @@
                     <div class="current-time-info">
                         <strong>현재 시간: ${timeData.current_time} (KST)</strong>
                         <br>
-                        운영 시간 외입니다. (운영시간: 07:00 - 22:00)
+                        운영 시간 외입니다. (운영시간: 07:00 - 23:00)
                     </div>
                 `;
                 timeSlots.appendChild(outOfHoursMessage);
             }
 
-            // 모든 가능한 시간대 생성 (7시부터 22시까지)
+            // 모든 가능한 시간대 생성 (7시부터 23시까지)
             const timeRanges = [];
-            for (let hour = 7; hour < 22; hour++) {
+            for (let hour = 7; hour < 23; hour++) {
                 timeRanges.push({
                     start: hour,
                     end: hour + 1,

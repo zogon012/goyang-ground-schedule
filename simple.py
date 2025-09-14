@@ -10,7 +10,7 @@ import pytz
 
 # 상수 정의
 TOTAL_FIELDS = 8  # 1~7번 필드 (range에서는 8까지)
-KST = pytz.timezone('Asia/Seoul')
+KST = pytz.timezone("Asia/Seoul")
 
 
 class TimeEncoder(json.JSONEncoder):
@@ -108,17 +108,19 @@ def get_schedule(target_date=None) -> DaySchedule:
                 if date_span and date_span.text.strip():
                     time_slot = date_span.text.strip()
 
-                    if current_team and time_slot:
-                        start_time, end_time = parse_time_slot(time_slot)
-                        matches.append(
-                            Match(
-                                date=target_date,
-                                field_name=field_name,
-                                team_name=current_team,
-                                start_time=start_time,
-                                end_time=end_time,
-                            )
+                    # 팀명이 없으면 "공백"으로 처리
+                    team_name = current_team if current_team else "이름없음"
+
+                    start_time, end_time = parse_time_slot(time_slot)
+                    matches.append(
+                        Match(
+                            date=target_date,
+                            field_name=field_name,
+                            team_name=team_name,
+                            start_time=start_time,
+                            end_time=end_time,
                         )
+                    )
 
         fields.append(FieldSchedule(field_name=field_name, matches=matches))
 
@@ -169,7 +171,7 @@ def get_today_empty_slots() -> dict:
     # KST 기준 현재 날짜 계산
     kst_now = datetime.now(KST)
     today = kst_now.date()
-    
+
     schedule = get_schedule(today)
     return get_empty_slots(schedule)
 
@@ -179,7 +181,7 @@ def get_today_complete_info() -> dict:
     # KST 기준 현재 날짜 계산
     kst_now = datetime.now(KST)
     today = kst_now.date()
-    
+
     schedule = get_schedule(today)
     empty_slots = get_empty_slots(schedule)
 
