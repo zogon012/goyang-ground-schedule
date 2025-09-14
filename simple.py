@@ -10,6 +10,8 @@ import pytz
 
 # 상수 정의
 TOTAL_FIELDS = 8  # 1~7번 필드 (range에서는 8까지)
+OPERATION_START_HOUR = 7  # 운영 시작 시간
+OPERATION_END_HOUR = 23  # 운영 종료 시간
 KST = pytz.timezone("Asia/Seoul")
 
 
@@ -142,9 +144,14 @@ def get_empty_slots(schedule: DaySchedule) -> dict:
 
         if not booked_times:
             # 예약이 없으면 전체 시간 비어있음
-            field_empty.append({"start_time": time(7, 0), "end_time": time(22, 0)})
+            field_empty.append(
+                {
+                    "start_time": time(OPERATION_START_HOUR, 0),
+                    "end_time": time(OPERATION_END_HOUR, 0),
+                }
+            )
         else:
-            current_hour = 7
+            current_hour = OPERATION_START_HOUR
 
             for start_hour, end_hour in booked_times:
                 if current_hour < start_hour:
@@ -156,9 +163,12 @@ def get_empty_slots(schedule: DaySchedule) -> dict:
                     )
                 current_hour = max(current_hour, end_hour)
 
-            if current_hour < 22:
+            if current_hour < OPERATION_END_HOUR:
                 field_empty.append(
-                    {"start_time": time(current_hour, 0), "end_time": time(22, 0)}
+                    {
+                        "start_time": time(current_hour, 0),
+                        "end_time": time(OPERATION_END_HOUR, 0),
+                    }
                 )
 
         empty_slots[field.field_name] = field_empty
