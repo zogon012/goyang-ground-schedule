@@ -12,11 +12,11 @@ from fastapi.staticfiles import StaticFiles
 from schedule_service import ScheduleService
 from schedule_store import ScheduleStore
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
 DATABASE_PATH = os.getenv("DATABASE_PATH", "data/schedules.db")
-REFRESH_MIN_SECONDS = int(os.getenv("REFRESH_MIN_SECONDS", "180"))
-REFRESH_MAX_SECONDS = int(os.getenv("REFRESH_MAX_SECONDS", "420"))
+REFRESH_MIN_SECONDS = int(os.getenv("REFRESH_MIN_SECONDS", "2700"))
+REFRESH_MAX_SECONDS = int(os.getenv("REFRESH_MAX_SECONDS", "5400"))
 COLLECTOR_ENABLED = os.getenv("COLLECTOR_ENABLED", "true").lower() == "true"
 
 logging.basicConfig(

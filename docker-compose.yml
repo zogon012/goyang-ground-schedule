@@ -8,8 +8,8 @@ services:
       - DEBUG=false
       - LOG_LEVEL=WARNING
       - DATABASE_PATH=/app/data/schedules.db
-      - REFRESH_MIN_SECONDS=180
-      - REFRESH_MAX_SECONDS=420
+      - REFRESH_MIN_SECONDS=2700
+      - REFRESH_MAX_SECONDS=5400
     volumes:
       - schedule-data:/app/data
     restart: unless-stopped

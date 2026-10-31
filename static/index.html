@@ -6,94 +6,182 @@
     <title>고양시 축구장 예약 현황</title>
     <style>
         :root {
-            --ink: #172033;
-            --muted: #667085;
-            --line: #e4e7ec;
-            --surface: #ffffff;
-            --page: #f7f8fa;
-            --primary: #216e4e;
-            --primary-soft: #e8f3ed;
-            --warning: #9a6700;
-            --danger: #b42318;
+            --primary: #0066cc;
+            --primary-focus: #0071e3;
+            --primary-on-dark: #2997ff;
+            --ink: #1d1d1f;
+            --muted: #7a7a7a;
+            --dark-muted: #cccccc;
+            --canvas: #ffffff;
+            --parchment: #f5f5f7;
+            --pearl: #fafafc;
+            --tile-dark: #272729;
+            --black: #000000;
+            --hairline: #e0e0e0;
+            --divider: #f0f0f0;
         }
 
         * { box-sizing: border-box; }
+        html { background: var(--parchment); }
         body {
             margin: 0;
-            background: var(--page);
             color: var(--ink);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            line-height: 1.5;
+            background: var(--parchment);
+            font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-size: 17px;
+            font-weight: 400;
+            letter-spacing: -0.374px;
+            line-height: 1.47;
         }
-        .container { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 40px 0 64px; }
-        header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 28px; }
-        h1, h2, h3, p { margin: 0; }
-        h1 { font-size: clamp(1.7rem, 4vw, 2.35rem); letter-spacing: -0.04em; }
-        h2 { font-size: 1.15rem; }
-        .subtitle { color: var(--muted); margin-top: 6px; }
+        button { font: inherit; }
+        .global-nav {
+            height: 44px;
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            background: var(--black);
+        }
+        .nav-inner, .sub-nav-inner, .content-width { width: min(980px, calc(100% - 40px)); margin: 0 auto; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; font-size: 12px; letter-spacing: -0.12px; }
+        .nav-label { color: #ffffff; text-decoration: none; }
+        .nav-meta { color: #cccccc; }
+        .sub-nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            background: rgba(245, 245, 247, 0.82);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: saturate(180%) blur(20px);
+        }
+        .sub-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .sub-nav-title { font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 21px; font-weight: 600; letter-spacing: 0.231px; line-height: 1.19; }
         .refresh-button {
-            flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
-            color: var(--ink); cursor: pointer; font: inherit; padding: 10px 14px;
+            min-height: 44px;
+            padding: 11px 22px;
+            color: #ffffff;
+            background: var(--primary);
+            border: 0;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-size: 17px;
         }
-        .refresh-button:hover { border-color: var(--primary); color: var(--primary); }
-        .refresh-button:disabled { color: var(--muted); cursor: wait; }
-        .status-bar {
-            display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 20px;
-            color: var(--muted); font-size: 0.875rem;
+        .refresh-button:focus-visible { outline: 2px solid var(--primary-focus); outline-offset: 3px; }
+        .refresh-button:active { transform: scale(0.95); }
+        .refresh-button:disabled { opacity: 0.55; cursor: wait; }
+        .hero {
+            min-height: 410px;
+            display: grid;
+            place-items: center;
+            padding: 80px 20px;
+            text-align: center;
+            background: var(--canvas);
         }
+        .hero-copy { max-width: 720px; }
+        h1, h2, h3, p { margin: 0; }
+        h1 {
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-size: clamp(40px, 7vw, 56px);
+            font-weight: 600;
+            letter-spacing: -0.28px;
+            line-height: 1.07;
+        }
+        .hero-date { margin-top: 16px; color: var(--ink); font-size: clamp(21px, 3vw, 28px); font-weight: 400; letter-spacing: 0.196px; line-height: 1.14; }
+        .hero-summary { margin: 16px auto 0; color: var(--muted); max-width: 580px; }
+        .status-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px 16px; margin-top: 28px; color: var(--muted); font-size: 14px; letter-spacing: -0.224px; }
         .status { color: var(--primary); font-weight: 600; }
-        .status.warning { color: var(--warning); }
-        .status.error { color: var(--danger); }
-        .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 20px; }
-        .panel-heading { border-bottom: 1px solid var(--line); padding: 18px 20px; }
-        .availability { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--line); }
-        .availability-row { background: var(--surface); padding: 15px 20px; }
-        .availability-time { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
-        .availability-fields { color: var(--ink); font-weight: 600; margin-top: 4px; }
-        .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
-        .field-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-        .field-card h3 { padding: 16px 18px; border-bottom: 1px solid var(--line); font-size: 1rem; }
-        .section { padding: 14px 18px; }
-        .section + .section { border-top: 1px solid var(--line); }
-        .section-title { color: var(--muted); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 8px; }
-        .entry { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 0.92rem; }
-        .entry + .entry { border-top: 1px solid #f0f1f3; }
-        .entry-time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-        .empty { color: var(--muted); font-size: 0.92rem; }
-        .message { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--muted); padding: 32px 20px; text-align: center; }
+        .status.warning { color: #9a6700; }
+        .status.error { color: #b42318; }
+        .tile { padding: 80px 0; }
+        .tile-dark { color: #ffffff; background: var(--tile-dark); }
+        .tile-parchment { background: var(--parchment); }
+        .section-heading { max-width: 620px; margin: 0 auto 48px; text-align: center; }
+        .section-heading h2 { font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: clamp(34px, 5vw, 40px); font-weight: 600; letter-spacing: 0; line-height: 1.1; }
+        .section-heading p { margin-top: 12px; color: var(--dark-muted); }
+        .tile-parchment .section-heading p { color: var(--muted); }
+        .availability { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid rgba(255, 255, 255, 0.24); border-left: 1px solid rgba(255, 255, 255, 0.24); }
+        .availability-row { min-height: 150px; padding: 20px; border-right: 1px solid rgba(255, 255, 255, 0.24); border-bottom: 1px solid rgba(255, 255, 255, 0.24); }
+        .availability-time { color: var(--dark-muted); font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: -0.224px; }
+        .availability-fields { margin-top: 10px; font-size: 17px; font-weight: 600; line-height: 1.24; }
+        .field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .field-card { overflow: hidden; background: var(--canvas); border: 1px solid var(--hairline); border-radius: 18px; }
+        .field-card h3 { padding: 24px 24px 18px; font-size: 21px; font-weight: 600; letter-spacing: 0.231px; line-height: 1.19; }
+        .section { padding: 18px 24px 24px; border-top: 1px solid var(--divider); }
+        .section-title { margin-bottom: 10px; color: var(--muted); font-size: 14px; font-weight: 600; letter-spacing: -0.224px; line-height: 1.29; }
+        .entry { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; font-size: 14px; letter-spacing: -0.224px; }
+        .entry + .entry { border-top: 1px solid var(--divider); }
+        .entry-time { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .empty { color: var(--muted); font-size: 14px; }
+        .message { width: min(980px, calc(100% - 40px)); margin: 0 auto; padding: 80px 20px; color: var(--muted); text-align: center; }
+        footer { padding: 48px 0; color: var(--muted); background: var(--parchment); border-top: 1px solid var(--hairline); font-size: 12px; letter-spacing: -0.12px; }
         [hidden] { display: none; }
-        @media (max-width: 620px) {
-            .container { width: min(100% - 24px, 1120px); padding-top: 24px; }
-            header { align-items: stretch; flex-direction: column; }
-            .refresh-button { width: 100%; }
+        @media (max-width: 1068px) { .availability { grid-template-columns: repeat(3, 1fr); } .field-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 734px) { .hero, .tile { padding-top: 48px; padding-bottom: 48px; } .availability { grid-template-columns: repeat(2, 1fr); } .section-heading { margin-bottom: 32px; } }
+        @media (max-width: 480px) {
+            .nav-inner, .sub-nav-inner, .content-width { width: min(100% - 24px, 980px); }
+            .nav-meta { display: none; }
+            .sub-nav-title { font-size: 17px; }
+            .refresh-button { padding: 9px 16px; font-size: 14px; }
+            .hero { min-height: 360px; }
+            .availability, .field-grid { grid-template-columns: 1fr; }
+            .availability-row { min-height: auto; }
         }
     </style>
 </head>
 <body>
-    <main class="container">
-        <header>
-            <div>
-                <h1>축구장 예약 현황</h1>
-                <p class="subtitle" id="date-info">데이터를 확인하는 중입니다.</p>
-            </div>
-            <button class="refresh-button" id="refresh-button" type="button">최신 정보 확인</button>
-        </header>
-
-        <div class="status-bar" aria-live="polite">
-            <span class="status" id="status">수집 데이터 대기 중</span>
-            <span id="updated-at"></span>
-            <span id="next-refresh"></span>
+    <nav class="global-nav" aria-label="전역 메뉴">
+        <div class="nav-inner">
+            <a class="nav-label" href="/">고양시 생활체육</a>
+            <span class="nav-meta">예약 정보</span>
         </div>
+    </nav>
+    <nav class="sub-nav" aria-label="예약 현황 메뉴">
+        <div class="sub-nav-inner">
+            <span class="sub-nav-title">축구장 예약 현황</span>
+            <button class="refresh-button" id="refresh-button" type="button">최신 정보 확인</button>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" aria-labelledby="page-title">
+            <div class="hero-copy">
+                <h1 id="page-title">오늘, 이용 가능한 구장</h1>
+                <p class="hero-date" id="date-info">데이터를 확인하는 중입니다.</p>
+                <p class="hero-summary" id="hero-summary">저장된 최신 예약 정보를 표시합니다.</p>
+                <div class="status-row" aria-live="polite">
+                    <span class="status" id="status">수집 데이터 대기 중</span>
+                    <span id="updated-at"></span>
+                    <span id="next-refresh"></span>
+                </div>
+            </div>
+        </section>
 
         <div class="message" id="message">저장된 예약 정보를 불러오는 중입니다.</div>
-        <section id="content" hidden>
-            <section class="panel">
-                <div class="panel-heading"><h2>시간대별 빈 구장</h2></div>
-                <div class="availability" id="availability"></div>
+        <div id="content" hidden>
+            <section class="tile tile-dark" aria-labelledby="availability-title">
+                <div class="content-width">
+                    <div class="section-heading">
+                        <h2 id="availability-title">시간대별 빈 구장</h2>
+                        <p>각 시간에 바로 이용 가능한 구장입니다.</p>
+                    </div>
+                    <div class="availability" id="availability"></div>
+                </div>
             </section>
-            <section class="field-grid" id="field-grid"></section>
-        </section>
+            <section class="tile tile-parchment" aria-labelledby="field-title">
+                <div class="content-width">
+                    <div class="section-heading">
+                        <h2 id="field-title">구장별 예약 정보</h2>
+                        <p>빈 시간과 예약된 팀 정보를 함께 확인하세요.</p>
+                    </div>
+                    <div class="field-grid" id="field-grid"></div>
+                </div>
+            </section>
+        </div>
     </main>
+
+    <footer><div class="content-width">고양시 축구장 예약 현황</div></footer>
 
     <script>
         const message = document.getElementById('message');
@@ -104,7 +192,7 @@
         function formatDateTime(value) {
             if (!value) return '수집 시각 없음';
             return new Intl.DateTimeFormat('ko-KR', {
-                timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit'
             }).format(new Date(value));
         }
 
@@ -112,6 +200,13 @@
             const element = document.getElementById('status');
             element.textContent = text;
             element.className = `status ${type === 'normal' ? '' : type}`;
+        }
+
+        function addTextElement(parent, className, text) {
+            const element = document.createElement('div');
+            element.className = className;
+            element.textContent = text;
+            parent.appendChild(element);
         }
 
         function addEntry(parent, left, right) {
@@ -139,15 +234,17 @@
                     .map(([name]) => name);
                 const row = document.createElement('div');
                 row.className = 'availability-row';
-                const time = document.createElement('div');
-                time.className = 'availability-time';
-                time.textContent = `${String(hour).padStart(2, '0')}:00 - ${String(hour + 1).padStart(2, '0')}:00`;
-                const names = document.createElement('div');
-                names.className = 'availability-fields';
-                names.textContent = available.length ? available.join(', ') : '예약 가능한 구장 없음';
-                row.append(time, names);
+                addTextElement(row, 'availability-time', `${String(hour).padStart(2, '0')}:00 - ${String(hour + 1).padStart(2, '0')}:00`);
+                addTextElement(row, 'availability-fields', available.length ? available.join(', ') : '예약 가능한 구장 없음');
                 container.appendChild(row);
             }
+        }
+
+        function createSection(title) {
+            const section = document.createElement('div');
+            section.className = 'section';
+            addTextElement(section, 'section-title', title);
+            return section;
         }
 
         function renderFields(fields) {
@@ -158,26 +255,21 @@
                 card.className = 'field-card';
                 const title = document.createElement('h3');
                 title.textContent = name;
-                card.appendChild(title);
 
-                const emptySection = document.createElement('div');
-                emptySection.className = 'section';
-                emptySection.innerHTML = '<div class="section-title">빈 시간</div>';
+                const emptySection = createSection('빈 시간');
                 if (field.empty_slots.length) {
                     field.empty_slots.forEach((slot) => addEntry(emptySection, '이용 가능', `${slot.start_time} - ${slot.end_time}`));
                 } else {
-                    emptySection.insertAdjacentHTML('beforeend', '<div class="empty">빈 시간이 없습니다.</div>');
+                    addTextElement(emptySection, 'empty', '빈 시간이 없습니다.');
                 }
 
-                const bookedSection = document.createElement('div');
-                bookedSection.className = 'section';
-                bookedSection.innerHTML = '<div class="section-title">예약</div>';
+                const bookedSection = createSection('예약');
                 if (field.booked_matches.length) {
                     field.booked_matches.forEach((match) => addEntry(bookedSection, match.team_name, `${match.start_time} - ${match.end_time}`));
                 } else {
-                    bookedSection.insertAdjacentHTML('beforeend', '<div class="empty">예약이 없습니다.</div>');
+                    addTextElement(bookedSection, 'empty', '예약이 없습니다.');
                 }
-                card.append(emptySection, bookedSection);
+                card.append(title, emptySection, bookedSection);
                 grid.appendChild(card);
             });
         }
@@ -185,8 +277,9 @@
         function render(data) {
             const metadata = data.metadata;
             document.getElementById('date-info').textContent = `${data.date} ${data.weekday}요일 기준`;
-            document.getElementById('updated-at').textContent = `마지막 수집: ${formatDateTime(metadata.fetched_at)}`;
-            document.getElementById('next-refresh').textContent = metadata.next_refresh_at ? `다음 확인 예정: ${formatDateTime(metadata.next_refresh_at)}` : '';
+            document.getElementById('hero-summary').textContent = `${Object.keys(data.fields).length}개 구장의 최신 예약 정보를 표시합니다.`;
+            document.getElementById('updated-at').textContent = `마지막 수집 ${formatDateTime(metadata.fetched_at)}`;
+            document.getElementById('next-refresh').textContent = metadata.next_refresh_at ? `다음 확인 예정 ${formatDateTime(metadata.next_refresh_at)}` : '';
             setStatus(metadata.is_stale ? '이전 수집 데이터 표시 중' : '최신 수집 데이터', metadata.is_stale ? 'warning' : 'normal');
             renderAvailability(data.fields);
             renderFields(data.fields);
