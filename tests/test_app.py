@@ -45,4 +45,4 @@ def test_health_endpoint() -> None:
     client = TestClient(app_module.app)
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["version"] == "1.1.1"
+    assert response.json()["version"] == "1.1.2"

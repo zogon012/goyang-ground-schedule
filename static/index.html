@@ -102,11 +102,18 @@
         .section-heading p { margin-top: 12px; color: var(--dark-muted); }
         .tile-parchment .section-heading p { color: var(--muted); }
         .availability { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid rgba(255, 255, 255, 0.24); border-left: 1px solid rgba(255, 255, 255, 0.24); }
-        .availability-row { min-height: 150px; padding: 20px; border-right: 1px solid rgba(255, 255, 255, 0.24); border-bottom: 1px solid rgba(255, 255, 255, 0.24); }
+        .availability-row { min-height: 150px; padding: 20px; border-right: 1px solid rgba(255, 255, 255, 0.24); border-bottom: 1px solid rgba(255, 255, 255, 0.24); scroll-margin-top: 76px; }
+        .availability-row.current-time { outline: 2px solid var(--primary-on-dark); outline-offset: -2px; }
+        .availability-row:focus-visible { outline: 2px solid #ffffff; outline-offset: -2px; }
         .availability-time { color: var(--dark-muted); font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: -0.224px; }
         .availability-fields { margin-top: 10px; font-size: 17px; font-weight: 600; line-height: 1.24; }
+        .field-link { display: inline; padding: 0; color: var(--primary-on-dark); background: transparent; border: 0; cursor: pointer; font: inherit; font-weight: 600; text-align: left; }
+        .field-link + .field-link::before { content: ", "; color: #ffffff; }
+        .field-link:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; border-radius: 2px; }
+        .current-label { display: block; margin-top: 7px; color: var(--primary-on-dark); font-size: 12px; font-weight: 600; letter-spacing: -0.12px; }
         .field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .field-card { overflow: hidden; background: var(--canvas); border: 1px solid var(--hairline); border-radius: 18px; }
+        .field-card { overflow: hidden; background: var(--canvas); border: 1px solid var(--hairline); border-radius: 18px; scroll-margin-top: 76px; }
+        .field-card:focus-visible { outline: 2px solid var(--primary-focus); outline-offset: 4px; }
         .field-card h3 { padding: 24px 24px 18px; font-size: 21px; font-weight: 600; letter-spacing: 0.231px; line-height: 1.19; }
         .section { padding: 18px 24px 24px; border-top: 1px solid var(--divider); }
         .section-title { margin-bottom: 10px; color: var(--muted); font-size: 14px; font-weight: 600; letter-spacing: -0.224px; line-height: 1.29; }
@@ -188,6 +195,8 @@
         const content = document.getElementById('content');
         const refreshButton = document.getElementById('refresh-button');
         let isLoading = false;
+        let currentData = null;
+        const fieldCardByName = new Map();
 
         function formatDateTime(value) {
             if (!value) return '수집 시각 없음';
@@ -221,9 +230,31 @@
             parent.appendChild(entry);
         }
 
+        function getCurrentKstHour() {
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Asia/Seoul', hour: '2-digit', hourCycle: 'h23'
+            }).formatToParts(new Date());
+            return Number(parts.find((part) => part.type === 'hour').value);
+        }
+
+        function scrollToField(fieldName) {
+            const fieldCard = fieldCardByName.get(fieldName);
+            if (!fieldCard) return;
+            fieldCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.setTimeout(() => fieldCard.focus({ preventScroll: true }), 450);
+        }
+
+        function focusCurrentTime() {
+            const currentRow = document.querySelector('.availability-row.current-time');
+            if (!currentRow) return;
+            currentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            window.setTimeout(() => currentRow.focus({ preventScroll: true }), 450);
+        }
+
         function renderAvailability(fields) {
             const container = document.getElementById('availability');
             container.replaceChildren();
+            const currentHour = getCurrentKstHour();
             for (let hour = 7; hour < 23; hour += 1) {
                 const available = Object.entries(fields)
                     .filter(([, field]) => field.empty_slots.some((slot) => {
@@ -234,8 +265,25 @@
                     .map(([name]) => name);
                 const row = document.createElement('div');
                 row.className = 'availability-row';
+                row.tabIndex = -1;
+                if (hour === currentHour) row.classList.add('current-time');
                 addTextElement(row, 'availability-time', `${String(hour).padStart(2, '0')}:00 - ${String(hour + 1).padStart(2, '0')}:00`);
-                addTextElement(row, 'availability-fields', available.length ? available.join(', ') : '예약 가능한 구장 없음');
+                if (hour === currentHour) addTextElement(row, 'current-label', '현재 시간대');
+                const names = document.createElement('div');
+                names.className = 'availability-fields';
+                if (available.length) {
+                    available.forEach((fieldName) => {
+                        const link = document.createElement('button');
+                        link.className = 'field-link';
+                        link.type = 'button';
+                        link.textContent = fieldName;
+                        link.addEventListener('click', () => scrollToField(fieldName));
+                        names.appendChild(link);
+                    });
+                } else {
+                    names.textContent = '예약 가능한 구장 없음';
+                }
+                row.appendChild(names);
                 container.appendChild(row);
             }
         }
@@ -250,9 +298,12 @@
         function renderFields(fields) {
             const grid = document.getElementById('field-grid');
             grid.replaceChildren();
+            fieldCardByName.clear();
             Object.entries(fields).forEach(([name, field]) => {
                 const card = document.createElement('article');
                 card.className = 'field-card';
+                card.tabIndex = -1;
+                fieldCardByName.set(name, card);
                 const title = document.createElement('h3');
                 title.textContent = name;
 
@@ -274,7 +325,8 @@
             });
         }
 
-        function render(data) {
+        function render(data, shouldFocusCurrentTime) {
+            currentData = data;
             const metadata = data.metadata;
             document.getElementById('date-info').textContent = `${data.date} ${data.weekday}요일 기준`;
             document.getElementById('hero-summary').textContent = `${Object.keys(data.fields).length}개 구장의 최신 예약 정보를 표시합니다.`;
@@ -285,6 +337,7 @@
             renderFields(data.fields);
             message.hidden = true;
             content.hidden = false;
+            if (shouldFocusCurrentTime) window.setTimeout(focusCurrentTime, 50);
         }
 
         async function loadData(showPending = true) {
@@ -295,7 +348,8 @@
             try {
                 const response = await fetch('/today');
                 if (!response.ok) throw new Error('데이터 준비 중');
-                render(await response.json());
+                const shouldFocusCurrentTime = content.hidden;
+                render(await response.json(), shouldFocusCurrentTime);
             } catch (error) {
                 if (content.hidden) {
                     message.hidden = false;
@@ -311,6 +365,9 @@
         refreshButton.addEventListener('click', () => loadData(false));
         loadData();
         window.setInterval(() => loadData(false), 60000);
+        window.setInterval(() => {
+            if (currentData) renderAvailability(currentData.fields);
+        }, 60000);
     </script>
 </body>
 </html>
