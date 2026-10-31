@@ -1,6 +1,6 @@
 # 축구장 예약 현황 모니터링 시스템
 
-> **Version 1.1.2** - 고양시 축구장 실시간 예약 현황 확인
+> **Version 1.2.0** - 고양시 축구장 실시간 예약 현황 확인
 
 ## 개요
 
@@ -9,7 +9,7 @@
 
 ## 최근 변경
 
-- `1.1.2`: 현재 시간대에 자동으로 이동하고, 빈 구장 이름을 누르면 해당 구장 상세 정보로 이동합니다.
+- `1.2.0`: 날짜 메뉴에서 저장된 과거 예약 현황을 조회하고, 변경된 수집 결과만 이력으로 저장합니다.
 
 버전은 SemVer를 따릅니다. 호환되지 않는 변경은 메이저, 기능 추가는 마이너, 버그 수정은 패치 버전을 올립니다.
 
@@ -69,6 +69,8 @@ poetry run uvicorn app:app --reload --port 8000
 |------------|------|
 | `/` | 메인 웹 페이지 |
 | `/today` | 오늘의 예약 현황 (JSON) |
+| `/schedule?date=YYYY-MM-DD` | 선택 날짜의 저장된 예약 현황 (JSON) |
+| `/available-dates` | 조회 가능한 날짜 목록 |
 | `/current-time` | 현재 KST 시간 |
 | `/health` | 서버 상태 확인 |
 
@@ -102,6 +104,7 @@ curl http://localhost:8000/health | jq '.version'
 | `DEBUG` | false | 디버그 모드 |
 | `LOG_LEVEL` | WARNING | 로그 레벨 |
 | `DATABASE_PATH` | `data/schedules.db` | 예약 현황 저장소 경로 |
+| `HISTORY_PATH` | `data/history` | 변경 이력 Parquet 저장 경로 |
 | `REFRESH_MIN_SECONDS` | 2700 | 최소 수집 주기(초) |
 | `REFRESH_MAX_SECONDS` | 5400 | 최대 수집 주기(초) |
 

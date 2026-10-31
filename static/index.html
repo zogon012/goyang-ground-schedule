@@ -43,8 +43,12 @@
         }
         .nav-inner, .sub-nav-inner, .content-width { width: min(980px, calc(100% - 40px)); margin: 0 auto; }
         .nav-inner { display: flex; justify-content: space-between; align-items: center; font-size: 12px; letter-spacing: -0.12px; }
+        .nav-start { display: flex; align-items: center; gap: 14px; }
         .nav-label { color: #ffffff; text-decoration: none; }
         .nav-meta { color: #cccccc; }
+        .menu-button { display: grid; width: 32px; height: 32px; place-content: center; gap: 4px; padding: 0; color: #ffffff; background: transparent; border: 0; cursor: pointer; }
+        .menu-button span { display: block; width: 14px; height: 1px; background: currentColor; }
+        .menu-button:focus-visible { outline: 2px solid var(--primary-focus); outline-offset: 3px; }
         .sub-nav {
             position: sticky;
             top: 0;
@@ -122,6 +126,18 @@
         .entry-time { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
         .empty { color: var(--muted); font-size: 14px; }
         .message { width: min(980px, calc(100% - 40px)); margin: 0 auto; padding: 80px 20px; color: var(--muted); text-align: center; }
+        .history-backdrop { position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.32); }
+        .history-menu { position: fixed; top: 0; bottom: 0; left: 0; z-index: 20; width: min(380px, 100%); padding: 28px 24px; overflow-y: auto; color: var(--ink); background: var(--canvas); }
+        .history-menu-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .history-menu h2 { font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 28px; font-weight: 600; letter-spacing: -0.28px; line-height: 1.14; }
+        .close-button { min-width: 44px; min-height: 44px; padding: 0; color: var(--ink); background: var(--pearl); border: 1px solid var(--divider); border-radius: 9999px; cursor: pointer; }
+        .history-menu p { margin-top: 12px; color: var(--muted); font-size: 14px; }
+        .date-picker { width: 100%; height: 44px; margin-top: 28px; padding: 0 14px; color: var(--ink); background: var(--canvas); border: 1px solid var(--hairline); border-radius: 9999px; font: inherit; font-size: 14px; }
+        .date-list { display: grid; gap: 8px; margin-top: 24px; }
+        .date-button { min-height: 44px; padding: 10px 14px; color: var(--ink); background: var(--canvas); border: 1px solid var(--hairline); border-radius: 11px; cursor: pointer; font: inherit; font-size: 14px; text-align: left; }
+        .date-button.selected { color: var(--primary); border: 2px solid var(--primary-focus); }
+        .date-button:active { transform: scale(0.98); }
+        .no-history { color: var(--muted); font-size: 14px; }
         footer { padding: 48px 0; color: var(--muted); background: var(--parchment); border-top: 1px solid var(--hairline); font-size: 12px; letter-spacing: -0.12px; }
         [hidden] { display: none; }
         @media (max-width: 1068px) { .availability { grid-template-columns: repeat(3, 1fr); } .field-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -140,7 +156,10 @@
 <body>
     <nav class="global-nav" aria-label="전역 메뉴">
         <div class="nav-inner">
-            <a class="nav-label" href="/">고양시 생활체육</a>
+            <div class="nav-start">
+                <button class="menu-button" id="menu-button" type="button" aria-controls="history-menu" aria-expanded="false" aria-label="날짜 메뉴 열기"><span></span><span></span><span></span></button>
+                <a class="nav-label" href="/">고양시 생활체육</a>
+            </div>
             <span class="nav-meta">예약 정보</span>
         </div>
     </nav>
@@ -188,14 +207,33 @@
         </div>
     </main>
 
+    <div class="history-backdrop" id="history-backdrop" hidden></div>
+    <aside class="history-menu" id="history-menu" aria-labelledby="history-menu-title" hidden>
+        <div class="history-menu-header">
+            <h2 id="history-menu-title">날짜 선택</h2>
+            <button class="close-button" id="close-menu-button" type="button" aria-label="날짜 메뉴 닫기">닫기</button>
+        </div>
+        <p>저장된 예약 현황이 있는 날짜를 선택하세요.</p>
+        <input class="date-picker" id="date-picker" type="date" aria-label="날짜 선택">
+        <div class="date-list" id="date-list"></div>
+    </aside>
+
     <footer><div class="content-width">고양시 축구장 예약 현황</div></footer>
 
     <script>
         const message = document.getElementById('message');
         const content = document.getElementById('content');
         const refreshButton = document.getElementById('refresh-button');
+        const menuButton = document.getElementById('menu-button');
+        const closeMenuButton = document.getElementById('close-menu-button');
+        const historyMenu = document.getElementById('history-menu');
+        const historyBackdrop = document.getElementById('history-backdrop');
+        const datePicker = document.getElementById('date-picker');
+        const dateList = document.getElementById('date-list');
         let isLoading = false;
         let currentData = null;
+        let selectedDate = null;
+        let availableDates = new Map();
         const fieldCardByName = new Map();
 
         function formatDateTime(value) {
@@ -235,6 +273,70 @@
                 timeZone: 'Asia/Seoul', hour: '2-digit', hourCycle: 'h23'
             }).formatToParts(new Date());
             return Number(parts.find((part) => part.type === 'hour').value);
+        }
+
+        function getCurrentKstDate() {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+            }).formatToParts(new Date());
+            const getPart = (type) => parts.find((part) => part.type === type).value;
+            return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+        }
+
+        function openMenu() {
+            historyMenu.hidden = false;
+            historyBackdrop.hidden = false;
+            menuButton.setAttribute('aria-expanded', 'true');
+            window.setTimeout(() => datePicker.focus(), 0);
+        }
+
+        function closeMenu() {
+            historyMenu.hidden = true;
+            historyBackdrop.hidden = true;
+            menuButton.setAttribute('aria-expanded', 'false');
+            menuButton.focus();
+        }
+
+        function renderAvailableDates(dates) {
+            availableDates = new Map(dates.map((item) => [item.date, item]));
+            dateList.replaceChildren();
+            const todayButton = document.createElement('button');
+            todayButton.className = `date-button ${selectedDate === null ? 'selected' : ''}`;
+            todayButton.type = 'button';
+            todayButton.textContent = '오늘 보기';
+            todayButton.addEventListener('click', () => selectDate(null));
+            dateList.appendChild(todayButton);
+
+            if (!dates.length) {
+                addTextElement(dateList, 'no-history', '저장된 날짜 데이터가 없습니다.');
+                return;
+            }
+            dates.forEach((item) => {
+                const button = document.createElement('button');
+                button.className = `date-button ${selectedDate === item.date ? 'selected' : ''}`;
+                button.type = 'button';
+                button.textContent = `${item.date} · 마지막 수집 ${formatDateTime(item.fetched_at)}`;
+                button.addEventListener('click', () => selectDate(item.date));
+                dateList.appendChild(button);
+            });
+        }
+
+        async function loadAvailableDates() {
+            try {
+                const response = await fetch('/available-dates');
+                if (!response.ok) throw new Error('날짜 목록을 불러올 수 없습니다.');
+                renderAvailableDates((await response.json()).dates);
+            } catch (error) {
+                dateList.replaceChildren();
+                addTextElement(dateList, 'no-history', '날짜 목록을 불러오지 못했습니다.');
+            }
+        }
+
+        function selectDate(date) {
+            selectedDate = date;
+            datePicker.value = date || getCurrentKstDate();
+            closeMenu();
+            loadData(true);
         }
 
         function scrollToField(fieldName) {
@@ -346,10 +448,13 @@
             refreshButton.disabled = true;
             if (showPending && content.hidden) message.textContent = '저장된 예약 정보를 불러오는 중입니다.';
             try {
-                const response = await fetch('/today');
+                const url = selectedDate ? `/schedule?date=${encodeURIComponent(selectedDate)}` : '/today';
+                const response = await fetch(url);
                 if (!response.ok) throw new Error('데이터 준비 중');
-                const shouldFocusCurrentTime = content.hidden;
-                render(await response.json(), shouldFocusCurrentTime);
+                const data = await response.json();
+                const shouldFocusCurrentTime = content.hidden && data.date === getCurrentKstDate();
+                render(data, shouldFocusCurrentTime);
+                loadAvailableDates();
             } catch (error) {
                 if (content.hidden) {
                     message.hidden = false;
@@ -363,7 +468,18 @@
         }
 
         refreshButton.addEventListener('click', () => loadData(false));
+        menuButton.addEventListener('click', openMenu);
+        closeMenuButton.addEventListener('click', closeMenu);
+        historyBackdrop.addEventListener('click', closeMenu);
+        datePicker.addEventListener('change', () => {
+            if (availableDates.has(datePicker.value)) selectDate(datePicker.value);
+            else setStatus('저장된 데이터가 없는 날짜입니다.', 'warning');
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !historyMenu.hidden) closeMenu();
+        });
         loadData();
+        loadAvailableDates();
         window.setInterval(() => loadData(false), 60000);
         window.setInterval(() => {
             if (currentData) renderAvailability(currentData.fields);

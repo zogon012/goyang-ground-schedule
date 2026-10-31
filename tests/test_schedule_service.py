@@ -33,3 +33,13 @@ def test_store_returns_latest_snapshot(tmp_path) -> None:
 
     assert snapshot is not None
     assert snapshot.fetched_at == fetched_at
+
+
+def test_store_skips_identical_snapshot(tmp_path) -> None:
+    store = ScheduleStore(str(tmp_path / "schedules.db"))
+    store.initialize()
+    payload = {"date": "2026-10-31", "weekday": "토", "fields": {}}
+
+    assert store.save_snapshot(payload, datetime.fromisoformat("2026-10-31T10:00:00+09:00"))
+    assert not store.save_snapshot(payload, datetime.fromisoformat("2026-10-31T11:00:00+09:00"))
+    assert len(store.get_available_dates()) == 1

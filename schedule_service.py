@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from simple import KST, get_today_complete_info_json
+from history_writer import HistoryWriter
 from schedule_store import ScheduleSnapshot, ScheduleStore
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,7 @@ class ScheduleService:
         store: ScheduleStore,
         refresh_min_seconds: int,
         refresh_max_seconds: int,
+        history_writer: HistoryWriter | None = None,
     ) -> None:
         if refresh_min_seconds <= 0 or refresh_max_seconds < refresh_min_seconds:
             raise ValueError("유효하지 않은 수집 주기입니다.")
@@ -24,6 +26,7 @@ class ScheduleService:
         self._store = store
         self._refresh_min_seconds = refresh_min_seconds
         self._refresh_max_seconds = refresh_max_seconds
+        self._history_writer = history_writer
         self._next_refresh_at: datetime | None = None
         self._last_error: str | None = None
         self._collector_task: asyncio.Task[None] | None = None
@@ -31,10 +34,16 @@ class ScheduleService:
     async def initialize(self) -> None:
         await asyncio.to_thread(self._store.initialize)
 
-    async def get_today(self) -> tuple[ScheduleSnapshot | None, dict[str, Any]]:
-        target_date = self._today_string()
+    async def get_schedule(self, target_date: str) -> tuple[ScheduleSnapshot | None, dict[str, Any]]:
         snapshot = await asyncio.to_thread(self._store.get_latest_snapshot, target_date)
         return snapshot, self.status(snapshot)
+
+    async def get_today(self) -> tuple[ScheduleSnapshot | None, dict[str, Any]]:
+        return await self.get_schedule(self._today_string())
+
+    async def get_available_dates(self) -> list[dict[str, str]]:
+        dates = await asyncio.to_thread(self._store.get_available_dates)
+        return [{"date": date_value, "fetched_at": fetched_at.isoformat()} for date_value, fetched_at in dates]
 
     async def collect_today(self) -> None:
         started_at = self._now()
@@ -42,7 +51,9 @@ class ScheduleService:
         try:
             payload = await asyncio.to_thread(self._collect_payload)
             completed_at = self._now()
-            await asyncio.to_thread(self._store.save_snapshot, payload, completed_at)
+            changed = await asyncio.to_thread(self._store.save_snapshot, payload, completed_at)
+            if changed and self._history_writer is not None:
+                await asyncio.to_thread(self._history_writer.write_snapshot, payload, completed_at)
             await asyncio.to_thread(
                 self._store.save_collection_run,
                 target_date,

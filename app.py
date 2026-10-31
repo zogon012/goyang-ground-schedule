@@ -9,12 +9,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from history_writer import HistoryWriter
 from schedule_service import ScheduleService
 from schedule_store import ScheduleStore
 
-VERSION = "1.1.2"
+VERSION = "1.2.0"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
 DATABASE_PATH = os.getenv("DATABASE_PATH", "data/schedules.db")
+HISTORY_PATH = os.getenv("HISTORY_PATH", "data/history")
 REFRESH_MIN_SECONDS = int(os.getenv("REFRESH_MIN_SECONDS", "2700"))
 REFRESH_MAX_SECONDS = int(os.getenv("REFRESH_MAX_SECONDS", "5400"))
 COLLECTOR_ENABLED = os.getenv("COLLECTOR_ENABLED", "true").lower() == "true"
@@ -28,6 +30,7 @@ schedule_service = ScheduleService(
     store=ScheduleStore(DATABASE_PATH),
     refresh_min_seconds=REFRESH_MIN_SECONDS,
     refresh_max_seconds=REFRESH_MAX_SECONDS,
+    history_writer=HistoryWriter(HISTORY_PATH),
 )
 
 
@@ -71,6 +74,24 @@ async def get_today_schedule() -> dict[str, Any]:
             detail={"message": "수집된 예약 데이터가 없습니다.", "metadata": metadata},
         )
     return {**snapshot.payload, "metadata": metadata}
+
+
+@app.get("/schedule")
+async def get_schedule(date: str) -> dict[str, Any]:
+    try:
+        target_date = datetime.strptime(date, "%Y-%m-%d").date().isoformat()
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail="날짜 형식은 YYYY-MM-DD여야 합니다.") from error
+
+    snapshot, metadata = await schedule_service.get_schedule(target_date)
+    if snapshot is None:
+        raise HTTPException(status_code=404, detail="해당 날짜의 저장된 예약 데이터가 없습니다.")
+    return {**snapshot.payload, "metadata": metadata}
+
+
+@app.get("/available-dates")
+async def get_available_dates() -> dict[str, list[dict[str, str]]]:
+    return {"dates": await schedule_service.get_available_dates()}
 
 
 @app.get("/today/raw")
