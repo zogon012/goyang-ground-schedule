@@ -3,1055 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>축구장 예약 현황</title>
+    <title>고양시 축구장 예약 현황</title>
     <style>
         :root {
-            /* 🎨 2024-2025 트렌디 컬러 팔레트 */
-            
-            /* Primary - Electric Lime & Neon Green */
-            --primary-electric: #00ff88;
-            --primary-lime: #39ff14;
-            --primary-forest: #00d968;
-            --primary-dark: #00b359;
-            
-            /* Secondary - Cyber Purple & Electric Blue */
-            --secondary-purple: #8b5cf6;
-            --secondary-violet: #a855f7;
-            --secondary-cyber: #6366f1;
-            --secondary-indigo: #4f46e5;
-            
-            /* Accent - Neon Pink & Electric Orange */
-            --accent-pink: #ff0080;
-            --accent-coral: #ff6b9d;
-            --accent-orange: #ff4500;
-            --accent-sunset: #ff8c42;
-            
-            /* Modern Neutrals - 다크모드 트렌드 */
-            --bg-primary: #0a0a0b;        /* Ultra Dark */
-            --bg-secondary: #1a1a1d;      /* Dark Card */
-            --bg-tertiary: #2d2d30;       /* Elevated */
-            --bg-glass: rgba(255, 255, 255, 0.05);  /* Glassmorphism */
-            --bg-glass-hover: rgba(255, 255, 255, 0.1);
-            
-            /* Text Colors */
-            --text-primary: #ffffff;      /* Pure White */
-            --text-secondary: #e4e4e7;    /* Light Gray */
-            --text-muted: #a1a1aa;        /* Medium Gray */
-            --text-accent: var(--primary-electric);
-            
-            /* Status Colors - Vibrant */
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --info: var(--secondary-cyber);
-            
-            /* Modern Gradients */
-            --gradient-primary: linear-gradient(135deg, var(--primary-electric) 0%, var(--secondary-purple) 100%);
-            --gradient-secondary: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-sunset) 100%);
-            --gradient-dark: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-            --gradient-glass: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%, 
-                rgba(255, 255, 255, 0.05) 100%);
-            
-            /* Neon Glows */
-            --glow-primary: 0 0 20px rgba(0, 255, 136, 0.3);
-            --glow-secondary: 0 0 20px rgba(139, 92, 246, 0.3);
-            --glow-accent: 0 0 20px rgba(255, 0, 128, 0.3);
-            
-            /* Modern Shadows */
-            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
-            --shadow-elevated: 0 20px 40px rgba(0, 0, 0, 0.4);
-            --shadow-neon: 0 0 30px rgba(0, 255, 136, 0.2);
+            --ink: #172033;
+            --muted: #667085;
+            --line: #e4e7ec;
+            --surface: #ffffff;
+            --page: #f7f8fa;
+            --primary: #216e4e;
+            --primary-soft: #e8f3ed;
+            --warning: #9a6700;
+            --danger: #b42318;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-primary);
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(255, 0, 128, 0.1) 0%, transparent 50%);
-            padding: 20px;
-            line-height: 1.6;
-            color: var(--text-primary);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .header h1 {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 20px;
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 900;
-            letter-spacing: -0.03em;
-            text-shadow: var(--glow-primary);
-            filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.3));
-        }
-
-        .date-info {
-            background: var(--gradient-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-            padding: 16px 32px;
-            border-radius: 50px;
-            display: inline-block;
-            font-size: clamp(1rem, 2.5vw, 1.3rem);
-            font-weight: 700;
-            box-shadow: var(--shadow-glass);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .date-info::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .loading {
-            text-align: center;
-            padding: 80px 20px;
-            color: var(--text-muted);
-            font-size: 1.4rem;
-            font-weight: 600;
-        }
-
-        .field-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-        }
-
-        @media (min-width: 1400px) {
-            .field-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .field-card {
-            background: var(--gradient-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            box-shadow: var(--shadow-glass);
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-
-        .field-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--gradient-primary);
-            transform: scaleX(0);
-            transition: transform 0.4s ease;
-        }
-
-        .field-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-elevated);
-            border-color: var(--primary-electric);
-            box-shadow: var(--shadow-glass), var(--glow-primary);
-        }
-
-        .field-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .field-header {
-            background: var(--gradient-dark);
-            color: var(--text-primary);
-            padding: 24px;
-            font-size: clamp(1.1rem, 3vw, 1.4rem);
-            font-weight: 800;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .field-header::before {
-            content: '⚽';
-            position: absolute;
-            right: 24px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.8em;
-            opacity: 0.4;
-            filter: drop-shadow(0 0 10px var(--primary-electric));
-        }
-
-        .field-content {
-            padding: 24px;
-        }
-
-        .section {
-            margin-bottom: 28px;
-        }
-
-        .section:last-child {
-            margin-bottom: 0;
-        }
-
-        .section h3 {
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .empty-slots {
-            background: linear-gradient(135deg, 
-                rgba(0, 255, 136, 0.15) 0%, 
-                rgba(0, 255, 136, 0.05) 100%);
-            border-left: 4px solid var(--primary-electric);
-            border-radius: 20px;
-            padding: 24px;
-            position: relative;
-        }
-
-        .empty-slots::before {
-            content: '';
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 10px;
-            height: 10px;
-            background: var(--primary-electric);
-            border-radius: 50%;
-            box-shadow: var(--glow-primary);
-            animation: pulse-neon 2s infinite;
-        }
-
-        @keyframes pulse-neon {
-            0%, 100% { 
-                opacity: 1; 
-                box-shadow: 0 0 10px var(--primary-electric);
-            }
-            50% { 
-                opacity: 0.3; 
-                box-shadow: 0 0 20px var(--primary-electric);
-            }
-        }
-
-        .empty-slots h3::before {
-            content: "⚡";
-            font-size: 1.4em;
-            filter: drop-shadow(0 0 5px var(--primary-electric));
-        }
-
-        .booked-matches {
-            background: linear-gradient(135deg, 
-                rgba(255, 0, 128, 0.15) 0%, 
-                rgba(255, 140, 66, 0.05) 100%);
-            border-left: 4px solid var(--accent-pink);
-            border-radius: 20px;
-            padding: 24px;
-        }
-
-        .booked-matches h3::before {
-            content: "🔥";
-            font-size: 1.4em;
-            filter: drop-shadow(0 0 5px var(--accent-pink));
-        }
-
-        .slot, .match {
-            background: var(--bg-glass);
-            backdrop-filter: blur(10px);
-            padding: 18px 24px;
-            margin-bottom: 14px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slot::before, .match::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: var(--gradient-primary);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .slot:hover, .match:hover {
-            background: var(--bg-glass-hover);
-            transform: translateX(8px);
-            border-color: var(--primary-electric);
-            box-shadow: var(--glow-primary);
-        }
-
-        .slot:hover::before, .match:hover::before {
-            transform: scaleX(1);
-        }
-
-        .slot:last-child, .match:last-child {
-            margin-bottom: 0;
-        }
-
-        .slot .time, .match .time {
-            font-weight: 800;
-            color: var(--primary-electric);
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-            font-family: 'JetBrains Mono', 'Consolas', monospace;
-        }
-
-        .match .team {
-            margin-top: 12px;
-            color: var(--text-secondary);
-            font-size: clamp(0.9rem, 2vw, 1rem);
-            font-weight: 600;
-        }
-
-        .no-data {
-            text-align: center;
-            color: var(--text-muted);
-            font-style: italic;
-            padding: 40px 24px;
-            font-size: clamp(1rem, 2vw, 1.1rem);
-            opacity: 0.7;
-        }
-
-        .refresh-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--gradient-primary);
-            color: var(--text-primary);
-            border: none;
-            padding: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: var(--shadow-elevated), var(--glow-primary);
-            font-size: clamp(1.2rem, 3vw, 1.6rem);
-            width: 70px;
-            height: 70px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .refresh-btn:hover {
-            transform: scale(1.2) rotate(360deg);
-            box-shadow: var(--shadow-elevated), 0 0 40px rgba(0, 255, 136, 0.6);
-        }
-
-        .refresh-btn:active {
-            transform: scale(0.9);
-        }
-
-        /* 대시보드 스타일 */
-        .dashboard {
-            background: var(--gradient-glass);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 32px;
-            padding: 40px;
-            margin-bottom: 40px;
-            color: var(--text-primary);
-            box-shadow: var(--shadow-elevated);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .dashboard::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .dashboard > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .dashboard h2 {
-            text-align: center;
-            margin-bottom: 32px;
-            font-size: clamp(1.6rem, 4vw, 2.4rem);
-            font-weight: 800;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .time-table {
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            overflow: hidden;
-        }
-
-        .time-table-header {
-            background: var(--gradient-dark);
-            padding: 24px;
-            text-align: center;
-            font-weight: 800;
-            font-size: clamp(1.1rem, 3vw, 1.4rem);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-        }
-
-        .time-slots {
-            padding: 24px;
-        }
-
-        .time-slot {
-            display: flex;
-            align-items: center;
-            padding: 18px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .time-slot.current-time {
-            background: var(--bg-glass);
-            border-radius: 16px;
-            padding: 20px 16px;
-            border-left: 4px solid var(--accent-pink);
-            box-shadow: var(--glow-accent);
-            animation: current-glow 3s ease-in-out infinite alternate;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .time-slot.current-time::before {
-            content: '🔥 NOW';
-            position: absolute;
-            left: -5px;
-            top: -12px;
-            background: var(--accent-pink);
-            color: var(--text-primary);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            z-index: 2;
-            box-shadow: var(--glow-accent);
-        }
-
-        @keyframes current-glow {
-            0% { box-shadow: 0 0 20px rgba(255, 0, 128, 0.3); }
-            100% { box-shadow: 0 0 40px rgba(255, 0, 128, 0.6); }
-        }
-
-        .time-slot:hover {
-            background: var(--bg-glass-hover);
-            padding-left: 12px;
-        }
-
-        .time-slot.current-time:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .time-slot:last-child {
-            border-bottom: none;
-        }
-
-        .time-label {
-            min-width: 140px;
-            font-weight: 800;
-            font-size: clamp(0.95rem, 2vw, 1.2rem);
-            margin-right: 24px;
-            color: var(--text-primary);
-            background: var(--bg-glass);
-            padding: 10px 18px;
-            border-radius: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            font-family: 'JetBrains Mono', monospace;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .time-slot.current-time .time-label {
-            background: var(--accent-pink);
-            color: var(--text-primary);
-            font-weight: 900;
-            transform: scale(1.05);
-            box-shadow: var(--glow-accent);
-        }
-
-        .available-fields {
-            flex: 1;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .field-tag {
-            background: var(--bg-glass);
-            backdrop-filter: blur(10px);
-            color: var(--text-primary);
-            padding: 10px 18px;
-            border-radius: 30px;
-            font-size: clamp(0.85rem, 2vw, 1rem);
-            font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            user-select: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .field-tag[style*="cursor: pointer"] {
-            cursor: pointer;
-        }
-
-        .field-tag:active {
-            transform: translateY(-1px) scale(1.02);
-            transition: all 0.1s ease;
-        }
-
-        .field-tag::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .field-tag:hover {
-            background: rgba(0, 255, 136, 0.1);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: var(--glow-primary);
-            border-color: var(--primary-electric);
-        }
-
-        .field-tag:hover::before {
-            left: 100%;
-        }
-
-        .no-fields {
-            color: var(--text-muted);
-            font-style: italic;
-            font-size: clamp(0.9rem, 2vw, 1rem);
-            padding: 10px 18px;
-            opacity: 0.7;
-        }
-
-        /* 운영 시간 외 메시지 */
-        .out-of-hours-message {
-            background: linear-gradient(135deg, 
-                rgba(79, 70, 229, 0.2) 0%, 
-                rgba(124, 58, 237, 0.1) 100%);
-            border-radius: 24px;
-            padding: 32px;
-            margin-bottom: 24px;
-            text-align: center;
-            box-shadow: var(--shadow-glass);
-            border: 1px solid rgba(79, 70, 229, 0.3);
-        }
-
-        .current-time-info {
-            color: var(--text-primary);
-            font-size: 1.2em;
-            line-height: 1.8;
-        }
-
-        .current-time-info strong {
-            display: inline-block;
-            font-size: 1.4em;
-            font-weight: 800;
-            margin-bottom: 12px;
-            background: var(--gradient-secondary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* 반응형 디자인 */
-        @media (max-width: 767px) {
-            body {
-                padding: 15px;
-            }
-            
-            .dashboard {
-                padding: 24px 20px;
-                margin-bottom: 24px;
-            }
-            
-            .time-slot {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            
-            .time-label {
-                min-width: auto;
-                margin-right: 0;
-            }
-            
-            .available-fields {
-                width: 100%;
-            }
-            
-            .refresh-btn {
-                bottom: 20px;
-                right: 20px;
-                width: 55px;
-                height: 55px;
-                padding: 14px;
-            }
-            
-            .field-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
-        /* 스크롤바 스타일링 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--gradient-primary);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--gradient-secondary);
-        }
-
-        /* 선택 텍스트 스타일 */
-        ::selection {
-            background: var(--primary-electric);
-            color: var(--bg-primary);
-        }
-
-        /* 포커스 스타일 */
-        *:focus {
-            outline: 2px solid var(--primary-electric);
-            outline-offset: 2px;
+            margin: 0;
+            background: var(--page);
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.5;
+        }
+        .container { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 40px 0 64px; }
+        header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 28px; }
+        h1, h2, h3, p { margin: 0; }
+        h1 { font-size: clamp(1.7rem, 4vw, 2.35rem); letter-spacing: -0.04em; }
+        h2 { font-size: 1.15rem; }
+        .subtitle { color: var(--muted); margin-top: 6px; }
+        .refresh-button {
+            flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+            color: var(--ink); cursor: pointer; font: inherit; padding: 10px 14px;
+        }
+        .refresh-button:hover { border-color: var(--primary); color: var(--primary); }
+        .refresh-button:disabled { color: var(--muted); cursor: wait; }
+        .status-bar {
+            display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 20px;
+            color: var(--muted); font-size: 0.875rem;
+        }
+        .status { color: var(--primary); font-weight: 600; }
+        .status.warning { color: var(--warning); }
+        .status.error { color: var(--danger); }
+        .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 20px; }
+        .panel-heading { border-bottom: 1px solid var(--line); padding: 18px 20px; }
+        .availability { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--line); }
+        .availability-row { background: var(--surface); padding: 15px 20px; }
+        .availability-time { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+        .availability-fields { color: var(--ink); font-weight: 600; margin-top: 4px; }
+        .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+        .field-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+        .field-card h3 { padding: 16px 18px; border-bottom: 1px solid var(--line); font-size: 1rem; }
+        .section { padding: 14px 18px; }
+        .section + .section { border-top: 1px solid var(--line); }
+        .section-title { color: var(--muted); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 8px; }
+        .entry { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 0.92rem; }
+        .entry + .entry { border-top: 1px solid #f0f1f3; }
+        .entry-time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .empty { color: var(--muted); font-size: 0.92rem; }
+        .message { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; color: var(--muted); padding: 32px 20px; text-align: center; }
+        [hidden] { display: none; }
+        @media (max-width: 620px) {
+            .container { width: min(100% - 24px, 1120px); padding-top: 24px; }
+            header { align-items: stretch; flex-direction: column; }
+            .refresh-button { width: 100%; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>⚡ 축구장 예약 현황</h1>
-            <div class="date-info" id="dateInfo">로딩 중...</div>
-        </div>
-
-        <div class="dashboard" id="dashboard" style="display: none;">
-            <h2>🔥 실시간 빈 구장 현황</h2>
-            <div class="time-table">
-                <div class="time-table-header">
-                    <div>지금 어느 구장이 비어있나요?</div>
-                    <div id="currentTimeDisplay" style="font-size: 0.95em; margin-top: 8px; opacity: 0.9; font-weight: 700; font-family: 'JetBrains Mono', monospace;">
-                        현재 시간: 로딩 중...
-                    </div>
-                    <div id="cacheStatus" style="font-size: 0.85em; margin-top: 4px; opacity: 0.8; font-weight: 600;">
-                        시스템 상태: 확인 중...
-                    </div>
-                </div>
-                <div class="time-slots" id="timeSlots">
-                </div>
+    <main class="container">
+        <header>
+            <div>
+                <h1>축구장 예약 현황</h1>
+                <p class="subtitle" id="date-info">데이터를 확인하는 중입니다.</p>
             </div>
+            <button class="refresh-button" id="refresh-button" type="button">최신 정보 확인</button>
+        </header>
+
+        <div class="status-bar" aria-live="polite">
+            <span class="status" id="status">수집 데이터 대기 중</span>
+            <span id="updated-at"></span>
+            <span id="next-refresh"></span>
         </div>
 
-        <div class="loading" id="loading">
-            데이터를 불러오는 중...
-        </div>
-
-        <div class="field-grid" id="fieldGrid" style="display: none;">
-        </div>
-    </div>
-
-    <button class="refresh-btn" onclick="loadData()" title="새로고침">
-        🔄
-    </button>
+        <div class="message" id="message">저장된 예약 정보를 불러오는 중입니다.</div>
+        <section id="content" hidden>
+            <section class="panel">
+                <div class="panel-heading"><h2>시간대별 빈 구장</h2></div>
+                <div class="availability" id="availability"></div>
+            </section>
+            <section class="field-grid" id="field-grid"></section>
+        </section>
+    </main>
 
     <script>
-        // 전역 변수
-        let currentTimeInterval;
-        let timeSyncInterval;
+        const message = document.getElementById('message');
+        const content = document.getElementById('content');
+        const refreshButton = document.getElementById('refresh-button');
+        let isLoading = false;
 
-        async function loadData() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('fieldGrid').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'none';
-            
-            try {
-                // 현재 시간과 축구장 데이터를 병렬로 가져오기
-                const [scheduleResponse, timeResponse] = await Promise.all([
-                    fetch('/today'),
-                    fetch('/current-time')
-                ]);
-                
-                const scheduleData = await scheduleResponse.json();
-                const timeData = await timeResponse.json();
-                
-                document.getElementById('dateInfo').textContent = `${scheduleData.date} (${scheduleData.weekday})`;
-                
-                // 초기 시간 설정 및 실시간 업데이트 시작
-                updateCurrentTimeDisplay(timeData);
-                updateSystemStatus('healthy', '시스템 정상 동작');
-                startRealTimeClock(timeData);
-                startTimeSync();
-                startSystemHealthCheck();
-                
-                renderDashboard(scheduleData.fields, timeData);
-                renderFields(scheduleData.fields);
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                document.getElementById('fieldGrid').style.display = 'grid';
+        function formatDateTime(value) {
+            if (!value) return '수집 시각 없음';
+            return new Intl.DateTimeFormat('ko-KR', {
+                timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', second: '2-digit'
+            }).format(new Date(value));
+        }
 
-                // 현재 시간대로 스크롤
-                scrollToCurrentTime(timeData.current_hour);
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('loading').textContent = '데이터를 불러오는데 실패했습니다.';
-                updateSystemStatus('error', '데이터 로딩 실패');
+        function setStatus(text, type = 'normal') {
+            const element = document.getElementById('status');
+            element.textContent = text;
+            element.className = `status ${type === 'normal' ? '' : type}`;
+        }
+
+        function addEntry(parent, left, right) {
+            const entry = document.createElement('div');
+            entry.className = 'entry';
+            const label = document.createElement('span');
+            label.textContent = left;
+            const value = document.createElement('span');
+            value.className = 'entry-time';
+            value.textContent = right;
+            entry.append(label, value);
+            parent.appendChild(entry);
+        }
+
+        function renderAvailability(fields) {
+            const container = document.getElementById('availability');
+            container.replaceChildren();
+            for (let hour = 7; hour < 23; hour += 1) {
+                const available = Object.entries(fields)
+                    .filter(([, field]) => field.empty_slots.some((slot) => {
+                        const start = Number(slot.start_time.slice(0, 2));
+                        const end = Number(slot.end_time.slice(0, 2));
+                        return start <= hour && end > hour;
+                    }))
+                    .map(([name]) => name);
+                const row = document.createElement('div');
+                row.className = 'availability-row';
+                const time = document.createElement('div');
+                time.className = 'availability-time';
+                time.textContent = `${String(hour).padStart(2, '0')}:00 - ${String(hour + 1).padStart(2, '0')}:00`;
+                const names = document.createElement('div');
+                names.className = 'availability-fields';
+                names.textContent = available.length ? available.join(', ') : '예약 가능한 구장 없음';
+                row.append(time, names);
+                container.appendChild(row);
             }
-        }
-
-        function updateCurrentTimeDisplay(timeData) {
-            document.getElementById('currentTimeDisplay').textContent = `현재 시간: ${timeData.current_time} (KST)`;
-        }
-
-        function updateSystemStatus(status, message) {
-            const statusElement = document.getElementById('cacheStatus');
-            
-            if (status === 'healthy') {
-                statusElement.textContent = `시스템 상태: ${message}`;
-                statusElement.style.color = 'var(--success)';
-            } else if (status === 'warning') {
-                statusElement.textContent = `시스템 상태: ${message}`;
-                statusElement.style.color = 'var(--warning)';
-            } else {
-                statusElement.textContent = `시스템 상태: ${message}`;
-                statusElement.style.color = 'var(--error)';
-            }
-        }
-
-        function startRealTimeClock(initialTimeData) {
-            // 기존 인터벌 클리어
-            if (currentTimeInterval) {
-                clearInterval(currentTimeInterval);
-            }
-
-            // 초기 시간 설정 (서버에서 받은 정확한 시간)
-            let currentTime = new Date();
-            currentTime.setHours(initialTimeData.current_hour);
-            currentTime.setMinutes(initialTimeData.current_minute);
-            currentTime.setSeconds(initialTimeData.current_second);
-
-            // 매초마다 시간 업데이트
-            currentTimeInterval = setInterval(() => {
-                currentTime.setSeconds(currentTime.getSeconds() + 1);
-                
-                const hours = currentTime.getHours().toString().padStart(2, '0');
-                const minutes = currentTime.getMinutes().toString().padStart(2, '0');
-                const seconds = currentTime.getSeconds().toString().padStart(2, '0');
-                
-                document.getElementById('currentTimeDisplay').textContent = 
-                    `현재 시간: ${hours}:${minutes}:${seconds} (KST)`;
-            }, 1000);
-        }
-
-        function startTimeSync() {
-            // 기존 인터벌 클리어
-            if (timeSyncInterval) {
-                clearInterval(timeSyncInterval);
-            }
-
-            // 매분마다 서버와 시간 동기화
-            timeSyncInterval = setInterval(async () => {
-                try {
-                    const response = await fetch('/current-time');
-                    const timeData = await response.json();
-                    startRealTimeClock(timeData); // 정확한 시간으로 다시 동기화
-                    updateSystemStatus('healthy', '정상 동기화');
-                } catch (error) {
-                    console.warn('시간 동기화 실패:', error);
-                    updateSystemStatus('warning', '동기화 지연');
-                }
-            }, 60000); // 60초마다 동기화
-        }
-
-        function startSystemHealthCheck() {
-            // 2분마다 시스템 헬스체크
-            setInterval(async () => {
-                try {
-                    const response = await fetch('/health');
-                    const healthData = await response.json();
-                    
-                    if (healthData.status === 'healthy') {
-                        updateSystemStatus('healthy', '시스템 정상');
-                    } else {
-                        updateSystemStatus('error', '시스템 오류');
-                    }
-                } catch (error) {
-                    console.warn('헬스체크 실패:', error);
-                    updateSystemStatus('warning', '상태 확인 불가');
-                }
-            }, 120000); // 2분마다 체크
-        }
-
-        function scrollToCurrentTime(currentHour) {
-            // 현재 시간대 요소 찾기
-            const currentTimeElement = document.querySelector('.time-slot.current-time');
-            if (currentTimeElement) {
-                // 부드러운 스크롤로 해당 요소로 이동
-                setTimeout(() => {
-                    currentTimeElement.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
-                    });
-                }, 500); // 렌더링 후 약간의 딜레이
-            }
-        }
-
-        function scrollToField(fieldName) {
-            // 해당 구장 카드 찾기 (ID로 찾기)
-            const targetField = document.getElementById(`field-${fieldName}`);
-            
-            if (targetField) {
-                // 부드러운 스크롤로 해당 구장 카드로 이동
-                targetField.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start',
-                    inline: 'nearest'
-                });
-                
-                // 잠깐 하이라이트 효과 추가
-                const originalBoxShadow = targetField.style.boxShadow;
-                const originalTransform = targetField.style.transform;
-                
-                targetField.style.boxShadow = '0 0 30px var(--primary-electric), 0 0 60px rgba(0, 255, 136, 0.3)';
-                targetField.style.transform = 'scale(1.02)';
-                targetField.style.transition = 'all 0.5s ease';
-                
-                setTimeout(() => {
-                    targetField.style.boxShadow = originalBoxShadow;
-                    targetField.style.transform = originalTransform;
-                }, 2000);
-            } else {
-                // 백업 방법: 헤더 텍스트로 찾기
-                const fieldCards = document.querySelectorAll('.field-card');
-                fieldCards.forEach(card => {
-                    const fieldHeader = card.querySelector('.field-header');
-                    if (fieldHeader && fieldHeader.textContent.trim() === fieldName) {
-                        card.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'start' 
-                        });
-                    }
-                });
-            }
-        }
-
-        function renderDashboard(fields, timeData) {
-            const timeSlots = document.getElementById('timeSlots');
-            timeSlots.innerHTML = '';
-
-            // 현재 시간이 운영 시간 외인지 확인
-            const isOutOfHours = timeData.current_hour < 7 || timeData.current_hour >= 23;
-            
-            // 운영 시간 외 메시지 표시
-            if (isOutOfHours) {
-                const outOfHoursMessage = document.createElement('div');
-                outOfHoursMessage.className = 'out-of-hours-message';
-                outOfHoursMessage.innerHTML = `
-                    <div class="current-time-info">
-                        <strong>현재 시간: ${timeData.current_time} (KST)</strong>
-                        <br>
-                        운영 시간 외입니다. (운영시간: 07:00 - 23:00)
-                    </div>
-                `;
-                timeSlots.appendChild(outOfHoursMessage);
-            }
-
-            // 모든 가능한 시간대 생성 (7시부터 23시까지)
-            const timeRanges = [];
-            for (let hour = 7; hour < 23; hour++) {
-                timeRanges.push({
-                    start: hour,
-                    end: hour + 1,
-                    label: `${hour.toString().padStart(2, '0')}:00 - ${(hour + 1).toString().padStart(2, '0')}:00`,
-                    isCurrent: timeData.current_hour === hour && !isOutOfHours
-                });
-            }
-
-            timeRanges.forEach(timeRange => {
-                const availableFields = [];
-                
-                // 각 구장을 체크해서 이 시간대에 비어있는지 확인
-                Object.keys(fields).forEach(fieldName => {
-                    const field = fields[fieldName];
-                    const isAvailable = field.empty_slots.some(slot => {
-                        const slotStart = parseInt(slot.start_time.split(':')[0]);
-                        const slotEnd = parseInt(slot.end_time.split(':')[0]);
-                        return slotStart <= timeRange.start && slotEnd > timeRange.start;
-                    });
-                    
-                    if (isAvailable) {
-                        availableFields.push(fieldName);
-                    }
-                });
-
-                const timeSlotElement = createTimeSlotElement(timeRange.label, availableFields, timeRange.isCurrent);
-                timeSlots.appendChild(timeSlotElement);
-            });
-        }
-
-        function createTimeSlotElement(timeLabel, availableFields, isCurrent) {
-            const slot = document.createElement('div');
-            slot.className = isCurrent ? 'time-slot current-time' : 'time-slot';
-
-            const fieldsHtml = availableFields.length > 0 
-                ? availableFields.map(field => `<span class="field-tag" onclick="scrollToField('${field}')" style="cursor: pointer;">${field}</span>`).join('')
-                : '<div class="no-fields">예약 가능한 구장이 없습니다</div>';
-
-            slot.innerHTML = `
-                <div class="time-label">${timeLabel}</div>
-                <div class="available-fields">
-                    ${fieldsHtml}
-                </div>
-            `;
-
-            return slot;
         }
 
         function renderFields(fields) {
-            const fieldGrid = document.getElementById('fieldGrid');
-            fieldGrid.innerHTML = '';
+            const grid = document.getElementById('field-grid');
+            grid.replaceChildren();
+            Object.entries(fields).forEach(([name, field]) => {
+                const card = document.createElement('article');
+                card.className = 'field-card';
+                const title = document.createElement('h3');
+                title.textContent = name;
+                card.appendChild(title);
 
-            Object.keys(fields).forEach(fieldName => {
-                const field = fields[fieldName];
-                const fieldCard = createFieldCard(fieldName, field);
-                fieldGrid.appendChild(fieldCard);
+                const emptySection = document.createElement('div');
+                emptySection.className = 'section';
+                emptySection.innerHTML = '<div class="section-title">빈 시간</div>';
+                if (field.empty_slots.length) {
+                    field.empty_slots.forEach((slot) => addEntry(emptySection, '이용 가능', `${slot.start_time} - ${slot.end_time}`));
+                } else {
+                    emptySection.insertAdjacentHTML('beforeend', '<div class="empty">빈 시간이 없습니다.</div>');
+                }
+
+                const bookedSection = document.createElement('div');
+                bookedSection.className = 'section';
+                bookedSection.innerHTML = '<div class="section-title">예약</div>';
+                if (field.booked_matches.length) {
+                    field.booked_matches.forEach((match) => addEntry(bookedSection, match.team_name, `${match.start_time} - ${match.end_time}`));
+                } else {
+                    bookedSection.insertAdjacentHTML('beforeend', '<div class="empty">예약이 없습니다.</div>');
+                }
+                card.append(emptySection, bookedSection);
+                grid.appendChild(card);
             });
         }
 
-        function createFieldCard(fieldName, field) {
-            const card = document.createElement('div');
-            card.className = 'field-card';
-            card.id = `field-${fieldName}`; // 고유 ID 추가
-
-            card.innerHTML = `
-                <div class="field-header">
-                    ${fieldName}
-                </div>
-                <div class="field-content">
-                    <div class="section empty-slots">
-                        <h3>빈 시간대</h3>
-                        ${renderEmptySlots(field.empty_slots)}
-                    </div>
-                    <div class="section booked-matches">
-                        <h3>예약 현황</h3>
-                        ${renderBookedMatches(field.booked_matches)}
-                    </div>
-                </div>
-            `;
-
-            return card;
+        function render(data) {
+            const metadata = data.metadata;
+            document.getElementById('date-info').textContent = `${data.date} ${data.weekday}요일 기준`;
+            document.getElementById('updated-at').textContent = `마지막 수집: ${formatDateTime(metadata.fetched_at)}`;
+            document.getElementById('next-refresh').textContent = metadata.next_refresh_at ? `다음 확인 예정: ${formatDateTime(metadata.next_refresh_at)}` : '';
+            setStatus(metadata.is_stale ? '이전 수집 데이터 표시 중' : '최신 수집 데이터', metadata.is_stale ? 'warning' : 'normal');
+            renderAvailability(data.fields);
+            renderFields(data.fields);
+            message.hidden = true;
+            content.hidden = false;
         }
 
-        function renderEmptySlots(emptySlots) {
-            if (emptySlots.length === 0) {
-                return '<div class="no-data">빈 시간이 없습니다</div>';
+        async function loadData(showPending = true) {
+            if (isLoading) return;
+            isLoading = true;
+            refreshButton.disabled = true;
+            if (showPending && content.hidden) message.textContent = '저장된 예약 정보를 불러오는 중입니다.';
+            try {
+                const response = await fetch('/today');
+                if (!response.ok) throw new Error('데이터 준비 중');
+                render(await response.json());
+            } catch (error) {
+                if (content.hidden) {
+                    message.hidden = false;
+                    message.textContent = '수집된 데이터가 아직 없습니다. 잠시 후 다시 확인해 주세요.';
+                }
+                setStatus('데이터 확인 대기 중', 'warning');
+            } finally {
+                isLoading = false;
+                refreshButton.disabled = false;
             }
-
-            return emptySlots.map(slot => `
-                <div class="slot">
-                    <div class="time">${slot.start_time} ~ ${slot.end_time}</div>
-                </div>
-            `).join('');
         }
 
-        function renderBookedMatches(bookedMatches) {
-            if (bookedMatches.length === 0) {
-                return '<div class="no-data">예약이 없습니다</div>';
-            }
-
-            return bookedMatches.map(match => `
-                <div class="match">
-                    <div class="time">${match.start_time} ~ ${match.end_time}</div>
-                    <div class="team">${match.team_name}</div>
-                </div>
-            `).join('');
-        }
-
-        // 페이지 언로드 시 인터벌 정리
-        window.addEventListener('beforeunload', () => {
-            if (currentTimeInterval) {
-                clearInterval(currentTimeInterval);
-            }
-            if (timeSyncInterval) {
-                clearInterval(timeSyncInterval);
-            }
-        });
-
-        // 페이지 로드시 데이터 불러오기
+        refreshButton.addEventListener('click', () => loadData(false));
         loadData();
-        
-        // 5분마다 자동 새로고침
-        setInterval(loadData, 300000);
+        window.setInterval(() => loadData(false), 60000);
     </script>
 </body>
 </html>

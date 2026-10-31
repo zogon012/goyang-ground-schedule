@@ -7,6 +7,11 @@ services:
       - PYTHONPATH=/app
       - DEBUG=false
       - LOG_LEVEL=WARNING
+      - DATABASE_PATH=/app/data/schedules.db
+      - REFRESH_MIN_SECONDS=180
+      - REFRESH_MAX_SECONDS=420
+    volumes:
+      - schedule-data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -14,3 +19,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+volumes:
+  schedule-data:

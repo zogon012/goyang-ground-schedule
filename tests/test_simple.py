@@ -10,6 +10,7 @@ from simple import (
     DaySchedule,
     FieldSchedule,
     Match,
+    KST,
 )
 import json
 
@@ -127,10 +128,8 @@ class TestSimpleFunctions:
         }
         mock_get_info.return_value = mock_info
 
-        with patch("simple.date") as mock_date:
-            mock_date_instance = mock_date.today.return_value
-            mock_date_instance.strftime.return_value = "2025-09-14"
-            mock_date_instance.weekday.return_value = 6  # 일요일
+        with patch("simple.datetime") as mock_datetime:
+            mock_datetime.now.return_value = KST.localize(datetime(2025, 9, 14, 12, 0))
 
             result = get_today_complete_info_json()
 
