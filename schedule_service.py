@@ -45,7 +45,7 @@ class ScheduleService:
         dates = await asyncio.to_thread(self._store.get_available_dates)
         return [{"date": date_value, "fetched_at": fetched_at.isoformat()} for date_value, fetched_at in dates]
 
-    async def collect_today(self) -> None:
+    async def collect_today(self) -> bool:
         started_at = self._now()
         target_date = self._today_string()
         try:
@@ -63,6 +63,7 @@ class ScheduleService:
             )
             self._last_error = None
             logger.info("예약 현황 수집 완료: %s", target_date)
+            return True
         except Exception as error:
             completed_at = self._now()
             self._last_error = str(error)
@@ -75,6 +76,7 @@ class ScheduleService:
                 self._last_error,
             )
             logger.exception("예약 현황 수집 실패")
+            return False
 
     def start(self) -> None:
         if self._collector_task is None:

@@ -13,7 +13,7 @@ from history_writer import HistoryWriter
 from schedule_service import ScheduleService
 from schedule_store import ScheduleStore
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING").upper()
 DATABASE_PATH = os.getenv("DATABASE_PATH", "data/schedules.db")
 HISTORY_PATH = os.getenv("HISTORY_PATH", "data/history")
@@ -25,6 +25,7 @@ logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.WARNING),
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
+logger = logging.getLogger(__name__)
 
 schedule_service = ScheduleService(
     store=ScheduleStore(DATABASE_PATH),
@@ -37,6 +38,11 @@ schedule_service = ScheduleService(
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await schedule_service.initialize()
+    snapshot, _ = await schedule_service.get_today()
+    if snapshot is None:
+        collected = await schedule_service.collect_today()
+        if not collected:
+            logger.warning("초기 예약 현황 수집에 실패했습니다.")
     if COLLECTOR_ENABLED:
         schedule_service.start()
     yield
@@ -106,7 +112,7 @@ async def get_today_schedule_raw() -> dict[str, Any]:
 async def health_check() -> dict[str, Any]:
     snapshot, metadata = await schedule_service.get_today()
     return {
-        "status": "healthy",
+        "status": "healthy" if snapshot is not None else "degraded",
         "version": VERSION,
         "data_available": snapshot is not None,
         "collector_enabled": COLLECTOR_ENABLED,

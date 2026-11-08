@@ -11,10 +11,10 @@ from schedule_store import ScheduleStore
 async def test_collection_saves_snapshot(tmp_path, monkeypatch) -> None:
     service = ScheduleService(ScheduleStore(str(tmp_path / "schedules.db")), 180, 420)
     await service.initialize()
-    payload = {"date": "2026-10-31", "weekday": "토", "fields": {}}
+    payload = {"date": service._today_string(), "weekday": "토", "fields": {}}
     monkeypatch.setattr(service, "_collect_payload", lambda: payload)
 
-    await service.collect_today()
+    assert await service.collect_today()
     snapshot, metadata = await service.get_today()
 
     assert snapshot is not None
